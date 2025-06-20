@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 
     int stride_in_steps = stride_bytes / one_step_bytes;
     size_t num_total_reads = total_gmem_size_bytes / stride_bytes;
-    int threads_per_block = 256;
+    int threads_per_block = 512;
     int blocks_per_grid = (num_total_reads + threads_per_block - 1) / threads_per_block;
 
     // =======================================================================
