@@ -1,6 +1,14 @@
 #!/bin/bash
 
-# --- 配置 ---
+# =======================================================================
+#                           --- 配置区域 ---
+# =======================================================================
+
+# --- 核心修改点: 在这里手动修改 GPU 架构 ---
+# Ampere 架构 (例如 A100): 使用 "sm_80"
+# Hopper 架构 (例如 H100): 使用 "sm_90a"
+GPU_ARCH="sm_90a"
+
 # 编译后的可执行文件名
 EXECUTABLE_NAME="test"
 # CUDA 源代码文件名
@@ -10,9 +18,13 @@ OUTPUT_CSV="results.csv"
 # 迭代次数（可以设小一点以快速看到结果，例如10）
 ITERATIONS=20
 
+# =======================================================================
+#                           --- 脚本主体 ---
+# =======================================================================
+
 # --- 编译 ---
-echo "Compiling ${SOURCE_FILE}..."
-nvcc -arch=sm_90a -o ${EXECUTABLE_NAME} ${SOURCE_FILE} -O3 --expt-relaxed-constexpr
+echo "Compiling ${SOURCE_FILE} for architecture ${GPU_ARCH}..."
+nvcc -arch=${GPU_ARCH} -o ${EXECUTABLE_NAME} ${SOURCE_FILE} -O3 --expt-relaxed-constexpr
 if [ $? -ne 0 ]; then
     echo "Compilation failed. Aborting."
     exit 1
@@ -33,23 +45,21 @@ for step in "${steps[@]}"; do
     # 内层循环，遍历固定的 stride 值
     for stride in "${strides[@]}"; do
         
-        # ======================================================
-        #  核心修改点：只在 stride >= step 时执行测试
-        # ======================================================
+        # 只在 stride >= step 时执行测试
         if [ ${stride} -ge ${step} ]; then
             
-            # 同样需要检查 stride 是否为 step 的整数倍（在这里的组合下都会满足）
+            # 检查 stride 是否为 step 的整数倍
             if [ $((${stride} % ${step})) -ne 0 ]; then
-                # echo "Skipping: stride ${stride} is not a multiple of step ${step}."
                 continue
             fi
 
             echo "------------------------------------------------"
-            echo "Testing: step=${step} bytes, stride=${stride} bytes"
+            echo "Testing: step=${step} bytes, stride=${stride} bytes on ${GPU_ARCH}"
             
             # 运行 benchmark 程序，并捕获输出
             output=$(./${EXECUTABLE_NAME} --step=${step} --stride=${stride} --iter=${ITERATIONS})
-            bandwidth=$(echo "${output}" | grep "Effective Bandwidth" | awk '{print $3}')
+            # 修改 grep 关键词以匹配 C++ 代码的输出
+            bandwidth=$(echo "${output}" | grep "Read-Only Bandwidth" | awk '{print $3}')
             
             if [ -z "${bandwidth}" ]; then
                 echo "Failed to capture bandwidth for step=${step}, stride=${stride}. Skipping."
