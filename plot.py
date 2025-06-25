@@ -44,7 +44,8 @@ def plot_bandwidth_data(csv_file='results.csv'):
         plt.ylabel('Achieved Bandwidth (GB/s)', fontsize=12)
         
         ax = plt.gca()
-        ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+        # ax.xaxis.set_major_formatter(mticker.ScalarFormatter())
+        ax.xaxis.set_major_formatter(mticker.FormatStrFormatter('%d'))
         ax.yaxis.set_major_formatter(mticker.ScalarFormatter())
         ax.grid(True, which="both", linestyle='--', linewidth=0.5)
         plt.xticks(rotation=45)
@@ -93,4 +94,5 @@ def plot_bandwidth_data(csv_file='results.csv'):
         plt.close()
 
 if __name__ == '__main__':
-    plot_bandwidth_data()
+    csv_file='results.csv'
+    plot_bandwidth_data(csv_file)

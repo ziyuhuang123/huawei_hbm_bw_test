@@ -32,8 +32,8 @@ ITERATIONS=50
 reads_per_thread_list=(1 2 4 8 16 32 64 128 256)
 
 # 定义要测试的 one_step 列表 (单位: Bytes)
-# steps=(8 32 64)
-steps=(128)
+steps=(8 32 64)
+# steps=(128)
 
 # --- 修改点 2: 扩展 stride 列表以测试更大的内存跨度 ---
 # 定义要测试的 stride 列表 (单位: Bytes)
